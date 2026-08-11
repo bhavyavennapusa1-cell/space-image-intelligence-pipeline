@@ -1,0 +1,25 @@
+# Core & Deep Learning Frameworks
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0
+opencv-python-headless>=4.8.0
+Pillow>=10.0.0
+
+# Object Detection & Super-Resolution
+ultralytics>=8.0.0
+realesrgan>=0.3.0
+
+# AI & LLM Integration
+google-genai>=0.1.0
+python-dotenv>=1.0.0
+
+# Web Framework & Dashboard
+streamlit>=1.30.0
+
+# Utilities & Visualization
+requests>=2.31.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+
+# Document & Report Generation
+reportlab>=4.0.0
