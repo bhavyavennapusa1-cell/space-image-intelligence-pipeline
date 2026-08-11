@@ -81,3 +81,7 @@ Launch the interactive Streamlit mission dashboard:
 ```bash
 streamlit run src/app.py
 ```
+## Datasets & Resources
+- **Crater & Boulder Moon Dataset (YOLO Format):** https://www.kaggle.com/datasets/gurveersinghvirk/crater-boulder-moon-yolo-format
+- **Martian/Lunar Crater Dataset:** https://www.kaggle.com/datasets/lincolnzh/martianlunar-crater-detection-dataset
+  
