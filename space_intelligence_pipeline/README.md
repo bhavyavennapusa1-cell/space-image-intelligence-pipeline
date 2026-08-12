@@ -67,8 +67,8 @@ Create a `.env` file in the root of `space_intelligence_pipeline/` or set enviro
 
 ```bash
 # Environment Variables
-GEMINI_API_KEY="your_gemini_api_key_here"
-NASA_API_KEY="your_nasa_api_key_here"
+GEMINI_API_KEY="AQ.Ab8RN6LRU9e5VaL6u3_mgDIiVsN5lLbjTuvJscmnBAWquwAU0w"
+NASA_API_KEY="kmE9rG8r1mLMMgos14vmRtupC5g0GLtWzpESI62d"
 ```
 
 Or copy the provided template:
