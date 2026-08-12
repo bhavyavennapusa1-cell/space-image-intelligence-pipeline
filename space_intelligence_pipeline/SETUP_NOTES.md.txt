@@ -1,0 +1,40 @@
+Setup Notes — Image Enhancement Module (Real-ESRGAN)
+
+Read this before running enhancement.py on a new machine or Colab session.
+
+1. GPU is required for reasonable speed
+On Google Colab: Runtime → Change runtime type → Hardware accelerator → T4 GPU → Save
+Running on CPU works but is drastically slower (minutes instead of seconds) — do not run live during the demo if on CPU.
+Verify GPU is active before running anything:
+python
+  import torch
+  print(torch.cuda.is_available())
+2. Known bug: basicsr + torchvision compatibility
+
+The realesrgan package depends on basicsr, which imports a module (torchvision.transforms.functional_tensor) that was removed in newer torchvision versions. This causes a ModuleNotFoundError on fresh installs.
+
+Fix — run this BEFORE importing basicsr for the first time in a session:
+
+python
+!sed -i 's/from torchvision.transforms.functional_tensor import rgb_to_grayscale/from torchvision.transforms.functional import rgb_to_grayscale/' /usr/local/lib/python3.12/dist-packages/basicsr/data/degradations.py
+
+Note: the exact file path may differ slightly depending on the Python version in your environment. If the sed command reports "file not found," locate the correct path first with:
+
+python
+!find / -name "degradations.py" -path "*basicsr*" 2>/dev/null
+
+This patch does NOT persist across Colab session restarts — it must be re-applied every time you start a fresh Colab runtime, before Cell/Step that installs or imports basicsr.
+
+3. Memory safety
+
+Full-resolution NASA images (some are 2000-5000px wide) can crash Colab's free-tier RAM if processed at full size. ImageEnhancer.enhance() automatically resizes any input larger than 800px on its longest side before processing — this is intentional, not a bug, and keeps the pipeline stable on free hardware.
+
+4. Demo-day guidance
+
+Do not run enhancement live and cold in front of judges without a fallback. Pre-process 2-3 demo images in advance and cache the results. If live processing is desired, keep expectations low ("this takes a few seconds") and always have the Day 11 backup video ready in case of hardware/WiFi issues.
+
+5. Install order (once per fresh environment)
+pip install basicsr facexlib gfpgan -q
+pip install realesrgan -q
+[apply the sed patch above]
+[download weights/RealESRGAN_x4plus.pth from the Real-ESRGAN GitHub releases]
