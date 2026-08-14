@@ -1,46 +1,42 @@
 """
-Multimodal Grounded AI Reasoning module using Gemini API.
-Evaluates physical terrain safety, confidence indices, and uncertainty framing.
+Reasoning module using Gemini API (grounded).
+Takes YOLOv8 crater detection output and produces a plain-English,
+honesty-constrained analysis — explicitly flags low-confidence detections.
+"""
+import json
+import os
+from google import genai
+
+
+class CraterReasoner:
+    def __init__(self, api_key: str = None, model: str = "gemini-3.6-flash"):
+        key = api_key or os.environ.get("GEMINI_API_KEY")
+        if not key:
+            raise ValueError("No Gemini API key provided (arg or GEMINI_API_KEY env var).")
+        self.client = genai.Client(api_key=key)
+        self.model = model
+
+    def _build_prompt(self, detection_result: dict) -> str:
+        detections_json = json.dumps(detection_result["detections"], indent=2)
+        return f"""You are analyzing crater detection results from a YOLOv8 model trained on lunar/Martian surface imagery.
+
+Detection summary:
+- Total craters detected: {detection_result['count']}
+- Raw detections (label, confidence 0-1, box in pixel xyxy):
+{detections_json}
+
+Write a plain-English analysis for a non-technical reader. Rules:
+1. Only describe what the data actually shows - do not invent details not present in the detections.
+2. Explicitly call out any detection with confidence below 0.5 as low-confidence and worth manual review, rather than stating it as a confirmed crater.
+3. If detections cluster in one region of the image, mention that spatial pattern.
+4. Keep it to 3-5 sentences, no headers or bullet points.
+5. If count is 0, say so plainly and suggest possible reasons (image quality, no craters present, model limitations) rather than guessing.
 """
 
-from typing import Optional
-from PIL import Image
-from src.config import GEMINI_API_KEY, GEMINI_MODEL_NAME
-
-class SurfaceReasoningEngine:
-    """
-    Multimodal surface analysis engine leveraging the Gemini API.
-    """
-    def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or GEMINI_API_KEY
-        self.model_name = GEMINI_MODEL_NAME
-
-    def analyze_surface(self, image: Image.Image, prompt: str = "Analyze surface features and hazards.") -> str:
-        """
-        Generates grounded physics-aware planetary surface reasoning.
-        
-        Args:
-            image (Image.Image): Analyzed input visual frame.
-            prompt (str): Custom instruction or contextual query.
-            
-        Returns:
-            str: Multimodal evaluation with uncertainty and confidence framing.
-        """
-        if not self.api_key:
-            return (
-                "⚠️ API Key missing: Please configure GEMINI_API_KEY in your environment or .env file."
-            )
-        
-        # Placeholder response demonstrating grounded output framing
-        return (
-            "### Planetary Surface Intelligence Assessment\n\n"
-            "**1. Geological Topography**:\n"
-            "- Identified primary impact structure with sloped rim boundaries.\n"
-            "- High concentration of regolith ejecta surrounding the central basin.\n\n"
-            "**2. Landing Safety & Hazard Evaluation**:\n"
-            "- Flat plains within quadrant B present optimal landing zones.\n"
-            "- Sharp boulders detected near slope boundaries pose localized stability risks.\n\n"
-            "**3. Confidence & Uncertainty Framing**:\n"
-            "- Overall Assessment Confidence: **89%**\n"
-            "- Uncertainty Note: Sub-surface composition requires thermal infrared validation."
+    def reason(self, detection_result: dict) -> str:
+        prompt = self._build_prompt(detection_result)
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=prompt
         )
+        return response.text
