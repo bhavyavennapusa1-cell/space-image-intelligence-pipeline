@@ -176,6 +176,15 @@ def load_models():
     reasoner = CraterReasoner(api_key=os.environ.get("GEMINI_API_KEY"))
     return enhancer, detector, reasoner
 
+def run_detection(detector, image_path, conf_threshold):
+    """
+    CraterDetector takes conf_threshold in __init__, not detect().
+    Update the cached detector's threshold before each call so the
+    sidebar slider actually takes effect.
+    """
+    detector.conf_threshold = conf_threshold
+    return detector.detect(image_path)
+
 try:
     enhancer, detector, reasoner = load_models()
     models_ready = True
@@ -201,7 +210,7 @@ if uploaded_file and models_ready:
         enhanced_path = enhancer.enhance("uploaded_image.jpg", "enhanced_output.jpg")
 
     with st.spinner("🎯 Scanning for surface features..."):
-        detection_result = detector.detect("enhanced_output.jpg", conf_threshold=conf_threshold)
+        detection_result = run_detection(detector, "enhanced_output.jpg", conf_threshold)
 
     # --- TAB 1: Enhance & Detect ---
     with tab1:
